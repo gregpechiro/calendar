@@ -1,0 +1,17 @@
+body{
+	background-color:#fff;
+}
+
+div.activity{
+	cursor:pointer;cursor:hand;
+}
+
+.tooltipevent {
+	text-align: center;
+	width:100px;
+	background:rgba(0, 0, 0, 0.6);
+	border-radius: 5px;
+	position:absolute;
+	color: #fff;
+	z-index:10001;
+}

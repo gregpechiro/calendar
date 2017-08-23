@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        {{ template "head.tmpl" . }}
+
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.min.css">
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.print.css" media="print">
+
+        <link rel="stylesheet" href="/static/css/calendar.css">
+
+        <title>Home</title>
+    </head>
+    <body>
+
+
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 col-xl-12 text-center">
+                    <div id='calendar'></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- task modal -->
+		<div class="modal fade" id="taskModal" tabindex="-1">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+						<h4 class="modal-title" id="myModalLabel">Add Task</h4>
+					</div>
+					<div class="modal-body clearfix">
+						<div class="col-lg-12">
+							<form id="taskForm" action="/sales/task" method="post">
+
+								<div class="form-group">
+									<label>Title</label>
+									<input id="name" class="form-control clear" type="text" name="title"/>
+								</div>
+
+								<div class="form-group">
+									<input id="startString" type="hidden" class="form-control" name="start"/>
+								</div>
+
+								<div class="form-group">
+									<input id="endString" type="hidden" class="form-control" name="end"/>
+								</div>
+
+								<div class="form-group hide">
+									<label class="col-xs-3">All Day</label>
+									<div class="col-xs-4">
+										<label><input id="allDayTrue" type="radio" name="allDay" value="1"> &nbsp;&nbsp;&nbsp;True</label>
+									</div>
+									<div class="col-xs-4">
+										<label><input id="allDayFalse" type="radio" name="allDay" value="0" checked> &nbsp;&nbsp;&nbsp;False</label>
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label>Description</label>
+									<textarea id="description" name="description" class="form-control" rows="3" style="resize:none;"></textarea>
+								</div>
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        <button id="save" type="button" class="btn btn-block btn-primary">Save</button>
+                                    </div>
+                                    <div class="col-xs-6">
+                                        <a class="btn btn-block btn-danger hide confirm-action" data-message="Are you sure you would like to delete this event??" data-color="#ff0000" data-url="" data-type="warning">Delete</a>
+                                    </div>
+                                </div>
+
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+        {{ template "scripts.tmpl" . }}
+        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js" charset="utf-8"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.min.js" charset="utf-8"></script>
+        <script src="/static/js/calendar.js" charset="utf-8"></script>
+
+    </body>
+</html>
