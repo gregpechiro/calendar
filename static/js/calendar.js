@@ -1,10 +1,15 @@
 $(document).ready(function() {
 
+	var eventId;
+
 	$('#taskModal').on('hidden.bs.modal', function() {
 		clearForm();
+		$('div#activities').addClass('hide');
+		eventId = null;
 	});
 
 	var form = 'form#taskForm';
+	var activityForm = 'form#activityForm';
 
 	function clearForm() {
 		$(form + ' input#name').val('');
@@ -22,8 +27,8 @@ $(document).ready(function() {
 		$(form + ' input[id="startString"]').val(event.start.toISOString());
 		$(form + ' input[id="endString"]').val(event.end.toISOString());
 		$(form + ' textarea[id="description"]').val(event.description);
-		$(form).append('<input type="hidden" id="id" name="id"/>');
-		$(form + ' input[id="id"]').val(event.id);
+		$(form).append('<input type="hidden" id="id" name="id" value="' + event.id + '"/>');
+		$(form).append('<input type="hidden" id="id" name="id" value="' + event.id + '"/>');
 		$(form + ' a.confirm-action').attr('data-url', '/event/' + event.id);
 		$(form + ' a.confirm-action').removeClass('hide');
 	}
@@ -32,13 +37,17 @@ $(document).ready(function() {
         saveEvent();
     });
 
+	$('button#activityAction').click(function() {
+        saveActivity(eventId);
+    });
+
     function saveEvent() {
         $.ajax({
             url:'/event',
             type:'POST',
             data: $(form).serialize(),
             success:function(resp) {
-                clearForm();
+                // clearForm();
                 $('#taskModal').modal('hide');
                 if (resp.error) {
                     $.Notification.autoHideNotify('error', 'top right', resp.msg);
@@ -48,7 +57,7 @@ $(document).ready(function() {
                 calendar.fullCalendar( 'refetchEvents' );
             },
             error: function(e, d) {
-                clearForm();
+                // clearForm();
                 $('#taskModal').modal('hide');
                 console.log(e);
                 console.log(d);
@@ -56,6 +65,72 @@ $(document).ready(function() {
             }
         });
     }
+
+	/*function fillActivityForm(event) {
+		$(form + ' input[id="name"]').val(event.title);
+		if (event.end == null) {
+			event.end = event.start.clone();
+			event.end.add(1, 'hours');
+		}
+		$(form + ' input[id="startString"]').val(event.start.toISOString());
+		$(form + ' input[id="endString"]').val(event.end.toISOString());
+		$(form + ' textarea[id="description"]').val(event.description);
+		$(form).append('<input type="hidden" id="id" name="id"/>');
+		$(form + ' input[id="id"]').val(event.id);
+		$(form + ' a.confirm-action').attr('data-url', '/event/' + event.id);
+		$(form + ' a.confirm-action').removeClass('hide');
+	}*/
+
+	function getActivities(eid) {
+		$.ajax({
+			url:'/event/' + eid + '/activity',
+			type: 'GET',
+			success: function(resp) {
+				if (resp.error) {
+					$.Notification.autoHideNotify('error', 'top right', resp.msg);
+					return;
+				}
+				genActivities(resp.data);
+			},
+			error: function(e, d) {
+				console.log(e);
+                console.log(d);
+                $.Notification.autoHideNotify('error', 'top right', 'Error contacting server');
+			}
+		})
+	}
+
+	function genActivities(activities) {
+		var a;
+		for (var i = 0; i < activities.length; i++) {
+			a +=
+			'<tr><td>' + activities[i].type + '</td>' +
+			'<td>' + moment(Math.floor(activities[i].start / 1000000)).format("h:mma M/DD/YY") + '</td>' +
+			'<td>' + (activities[i].end > 0 ? moment(Math.floor(activities[i].end / 1000000)).format("h:mma M/DD/YY") : '') +'</td>' +
+			'<td>Action</td></tr>';
+		}
+		$('tbody#allActivities').html(a);
+	}
+
+	function saveActivity(eid) {
+		$.ajax({
+            url:'/event/' + eid + '/activity',
+            type:'POST',
+            data: $(activityForm).serialize(),
+            success:function(resp) {
+                if (resp.error) {
+                    $.Notification.autoHideNotify('error', 'top right', resp.msg);
+                    return
+                }
+                genActivities(resp.data);
+            },
+            error: function(e, d) {
+                console.log(e);
+                console.log(d);
+                $.Notification.autoHideNotify('error', 'top right', 'Error contacting server');
+            }
+        });
+	}
 
 	var calendar = $('#calendar').fullCalendar({
         defaultDate: new Date(),
@@ -87,7 +162,10 @@ $(document).ready(function() {
             }
         },
 		eventClick: function(event, jsEvent, view) {
+			$('div#activities').removeClass('hide');
 			fillForm(event);
+			eventId = event.id;
+			getActivities(eventId);
 			$('#taskModal').modal('show');
 		},
 		eventDrop: function(event, delta, revertFunction, jsEvent, ui, view) {
@@ -121,7 +199,7 @@ $(document).ready(function() {
             url:btn.attr('data-url'),
             type: 'DELETE',
             success:function(resp) {
-                clearForm();
+                // clearForm();
                 $('#taskModal').modal('hide');
                 $.Notification.autoHideNotify('success', 'top right', resp.msg);
                 calendar.fullCalendar( 'refetchEvents' );
@@ -129,7 +207,7 @@ $(document).ready(function() {
             error: function(e, d) {
                 console.log(e);
                 console.log(d);
-                clearForm();
+                // clearForm();
                 $('#taskModal').modal('hide');
             }
         });

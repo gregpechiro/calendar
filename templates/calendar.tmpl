@@ -5,8 +5,18 @@
 
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.min.css">
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.print.css" media="print">
-
+        <link rel="stylesheet" href="/static/css/main.css">
         <link rel="stylesheet" href="/static/css/calendar.css">
+        <style>
+            table.table-scroll {
+                table-layout:fixed;
+            }
+
+            .div-table-content {
+                height:150px;
+                overflow-y:auto;
+            }
+        </style>
 
         <title>Home</title>
     </head>
@@ -30,47 +40,101 @@
 						<h4 class="modal-title" id="myModalLabel">Add Task</h4>
 					</div>
 					<div class="modal-body clearfix">
-						<div class="col-lg-12">
-							<form id="taskForm" action="/sales/task" method="post">
+						<form id="taskForm" method="post">
 
-								<div class="form-group">
-									<label>Title</label>
-									<input id="name" class="form-control clear" type="text" name="title"/>
-								</div>
+							<div class="form-group">
+								<label>Title</label>
+								<input id="name" class="form-control clear input-sm" type="text" name="title"/>
+							</div>
 
-								<div class="form-group">
-									<input id="startString" type="hidden" class="form-control" name="start"/>
-								</div>
+							<div class="form-group">
+								<input id="startString" type="hidden" class="form-control" name="start"/>
+							</div>
 
-								<div class="form-group">
-									<input id="endString" type="hidden" class="form-control" name="end"/>
-								</div>
+							<div class="form-group">
+								<input id="endString" type="hidden" class="form-control" name="end"/>
+							</div>
 
-								<div class="form-group hide">
-									<label class="col-xs-3">All Day</label>
-									<div class="col-xs-4">
-										<label><input id="allDayTrue" type="radio" name="allDay" value="1"> &nbsp;&nbsp;&nbsp;True</label>
-									</div>
-									<div class="col-xs-4">
-										<label><input id="allDayFalse" type="radio" name="allDay" value="0" checked> &nbsp;&nbsp;&nbsp;False</label>
-									</div>
+							<div class="form-group hide">
+								<label class="col-xs-3">All Day</label>
+								<div class="col-xs-4">
+									<label><input id="allDayTrue" type="radio" name="allDay" value="1"> &nbsp;&nbsp;&nbsp;True</label>
 								</div>
+								<div class="col-xs-4">
+									<label><input id="allDayFalse" type="radio" name="allDay" value="0" checked> &nbsp;&nbsp;&nbsp;False</label>
+								</div>
+							</div>
 
-								<div class="form-group">
-									<label>Description</label>
-									<textarea id="description" name="description" class="form-control" rows="3" style="resize:none;"></textarea>
-								</div>
-                                <div class="row">
-                                    <div class="col-xs-6">
-                                        <button id="save" type="button" class="btn btn-block btn-primary">Save</button>
+							<div class="form-group">
+								<label>Description</label>
+								<textarea id="description" name="description" class="form-control" rows="2" ></textarea>
+							</div>
+                        </form>
+                        <div class="row">
+                            <div class="">
+                                <div class="col-xs-6">
+                                    <button id="save" type="button" class="btn btn-block btn-primary btn-sm">Save</button>
+                                </div>
+                                <div class="col-xs-6">
+                                    <a class="btn btn-block btn-danger hide confirm-action btn-sm" data-message="Are you sure you would like to delete this event??" data-color="#ff0000" data-url="" data-type="warning">Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="activities" class="hide">
+                            <form id="activityForm">
+                                <br>
+                                <a data-toggle="collapse" href="#activitiesView">Activities</a>
+                                <div class="collapse" id="activitiesView">
+                                    <div class="row">
+                                        <div class="form-group">
+                                            <div class="col-xs-6">
+                                                <label>Type</label>
+                                                <select id="activityType" class="form-control input-sm" name="type">
+                                                    {{ range $state, $v := .activityStates }}
+                                                        <option value="{{ $v }}">{{ $state }}</option>
+                                                    {{ end }}
+                                                </select>
+                                            </div>
+                                            <div class="col-xs-6">
+                                                <label>Action</label>
+                                                <button type="button" id="activityAction" class="btn btn-success btn-block btn-sm">Start</button>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="col-xs-6">
-                                        <a class="btn btn-block btn-danger hide confirm-action" data-message="Are you sure you would like to delete this event??" data-color="#ff0000" data-url="" data-type="warning">Delete</a>
+                                    <div class="row">
+                                        <div class="col-xs-12">
+                                            <label>Notes</label>
+                                            <textarea class="form-control" id="activityNotes" name="notes" rows="2"></textarea>
+                                        </div>
+                                    </div>
+                                </form>
+                                <div id="allActivities" class="">
+                                    <br>
+                                    <table class="table table-condensed table-scroll" style="margin-bottom:0;">
+                                        <thead>
+                                            <tr>
+                                                <th>Type</th>
+                                                <th>Start</th>
+                                                <th>End</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                    <div class="div-table-content">
+                                        <table class="table table-condensed table-scroll">
+                                            <tbody id="allActivities">
+                                                <tr>
+                                                    <td>Type</td>
+                                                    <td>Start</td>
+                                                    <td>End</td>
+                                                    <td>Action</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
-
-							</form>
-						</div>
+                            </div>
+                        </div>
 					</div>
 				</div>
 			</div>

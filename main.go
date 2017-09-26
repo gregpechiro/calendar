@@ -18,7 +18,10 @@ func init() {
 	tmpl = web.NewTmplCache()
 
 	mux.AddRoutes(home, events, saveEvent, getEvent, delEvent)
+	mux.AddRoutes(eventActivities, saveActivity)
+
 	db.AddStore("event")
+	db.AddStore("activity")
 }
 
 func main() {

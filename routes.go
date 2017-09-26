@@ -1,15 +1,19 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 
+	"github.com/cagnosolutions/adb"
 	"github.com/cagnosolutions/web"
 )
 
 var home = web.Route{"GET", "/", func(w http.ResponseWriter, r *http.Request) {
-	tmpl.Render(w, r, "calendar.tmpl", nil)
+	tmpl.Render(w, r, "calendar.tmpl", web.Model{
+		"activityStates": ActivityStates,
+	})
 }}
 
 var events = web.Route{"GET", "/event", func(w http.ResponseWriter, r *http.Request) {
@@ -31,8 +35,6 @@ var events = web.Route{"GET", "/event", func(w http.ResponseWriter, r *http.Requ
 			goto defaultEvents
 		}
 		endTS := t.UnixNano()
-
-		// db.TestQuery("event", &events, adb.Gt("startTS", strconv.Itoa(int(startTS-1))), adb.Lt("startTS", strconv.Itoa(int(endTS+1))))
 		var events2 []Event
 		db.All("event", &events)
 
@@ -89,4 +91,30 @@ var getEvent = web.Route{"GET", "/event/:id", func(w http.ResponseWriter, r *htt
 var delEvent = web.Route{"DELETE", "/event/:id", func(w http.ResponseWriter, r *http.Request) {
 	db.Del("event", r.FormValue(":id"))
 	AjaxResponse(w, map[string]interface{}{"error": false, "msg": "Successfully deleted event"})
+	return
+}}
+
+var eventActivities = web.Route{"GET", "/event/:id/activity", func(w http.ResponseWriter, r *http.Request) {
+	var activities []Activity
+	db.TestQuery("activity", &activities, adb.Eq("eventId", `"`+r.FormValue(":id")+`"`))
+	AjaxResponse(w, map[string]interface{}{"error": false, "data": activities})
+	return
+}}
+
+var saveActivity = web.Route{"POST", "/event/:id/activity", func(w http.ResponseWriter, r *http.Request) {
+	var activity Activity
+	r.ParseForm()
+	fmt.Println(r.FormValue("type"))
+	web.FormToStruct(&activity, r.Form, "")
+	activity.EventId = r.FormValue(":id")
+	if activity.Id == "" {
+		activity.Id = genId()
+		activity.Start = time.Now().UnixNano()
+	}
+	db.Set("activity", activity.Id, activity)
+
+	var activities []Activity
+	db.TestQuery("activity", &activities, adb.Eq("eventId", `"`+activity.EventId+`"`))
+	AjaxResponse(w, map[string]interface{}{"error": false, "data": activities})
+	return
 }}
